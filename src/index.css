@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
+
+@layer base {
+  :root {
+    /* Luxury Void Palette */
+    --void-black: 0 0% 2%;
+    --gold-leaf: 43 56% 52%;
+    --deep-emerald: 165 100% 13%;
+    --twilight-blue: 210 38% 17%;
+    --marble-cream: 40 20% 95%;
+    
+    --background: 0 0% 2%;
+    --foreground: 40 20% 95%;
+
+    --card: 0 0% 5%;
+    --card-foreground: 40 20% 95%;
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 40 20% 95%;
+
+    --primary: 43 56% 52%;
+    --primary-foreground: 0 0% 2%;
+
+    --secondary: 165 100% 13%;
+    --secondary-foreground: 40 20% 95%;
+
+    --muted: 210 38% 17%;
+    --muted-foreground: 40 20% 70%;
+
+    --accent: 43 56% 52%;
+    --accent-foreground: 0 0% 2%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 40 20% 95%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 43 56% 52%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html, body, #root {
+    @apply h-full w-full overflow-hidden;
+  }
+  
+  body {
+    @apply bg-[#050505] text-[#F5F3EE] antialiased;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  
+  .font-display-light {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  
+  .font-ui {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  
+  .glass-panel {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+  
+  .gold-glow {
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.3), 0 0 80px rgba(212, 175, 55, 0.1);
+  }
+  
+  .emerald-glow {
+    box-shadow: 0 0 40px rgba(0, 64, 48, 0.5), 0 0 80px rgba(0, 64, 48, 0.2);
+  }
+  
+  .text-gold {
+    @apply text-[#D4AF37];
+  }
+  
+  .text-marble {
+    @apply text-[#F5F3EE];
+  }
+  
+  .bg-void {
+    @apply bg-[#050505];
+  }
+  
+  .bg-emerald-deep {
+    @apply bg-[#004030];
+  }
+  
+  .bg-twilight {
+    @apply bg-[#1A2B3C];
+  }
+}
+
+@layer utilities {
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background: linear-gradient(
+      90deg,
+      rgba(212, 175, 55, 0) 0%,
+      rgba(212, 175, 55, 0.3) 50%,
+      rgba(212, 175, 55, 0) 100%
+    );
+    background-size: 200% 100%;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+}
