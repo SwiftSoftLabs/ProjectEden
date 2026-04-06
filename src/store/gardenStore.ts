@@ -127,7 +127,7 @@ export const PLANT_SPECIES: PlantSpecies[] = [
     wateringFrequencyWinter: 45,
     rarity: 'rare',
     value: '$200+',
-    color: '#1A1A2E',
+    color: '#0A0F0A',
   },
   {
     id: 'shimpaku-bonsai',
@@ -140,10 +140,56 @@ export const PLANT_SPECIES: PlantSpecies[] = [
     value: '$5,000+',
     color: '#3A5A4A',
   },
+  {
+    id: 'maidenhair-fern',
+    name: 'Adiantum raddianum',
+    commonName: 'Maidenhair Fern',
+    description: 'Delicate, lacy foliage that demands high humidity and constant moisture.',
+    wateringFrequencySummer: 1,
+    wateringFrequencyWinter: 2,
+    rarity: 'rare',
+    value: '$45+',
+    color: '#90EE90',
+  },
+  {
+    id: 'calathea-orbifolia',
+    name: 'Goeppertia orbifolia',
+    commonName: 'Calathea Orbifolia',
+    description: 'Stunning round leaves with silver stripes. A true diva regarding water quality.',
+    wateringFrequencySummer: 2,
+    wateringFrequencyWinter: 4,
+    rarity: 'rare',
+    value: '$65+',
+    color: '#98FB98',
+  },
+  {
+    id: 'test-plant',
+    name: 'Debug Plant',
+    commonName: 'Test Plant',
+    description: 'A rapid-cycle plant for testing watering mechanics. Thirsty every 10 minutes.',
+    wateringFrequencySummer: 0.007, // ~10 minutes
+    wateringFrequencyWinter: 0.007,
+    rarity: 'rare',
+    value: '$0',
+    color: '#FF00FF',
+  },
+
+  {
+    id: 'test-plant-fast',
+    name: 'Debug Plant Fast',
+    commonName: 'Test Plant (Fast)',
+    description: 'Extremely rapid-cycle plant. Thirsty every 1 minute.',
+    wateringFrequencySummer: 0.000694, // ~1 minute (1/1440)
+    wateringFrequencyWinter: 0.000694,
+    rarity: 'legendary',
+    value: '$0',
+    color: '#00FFFF',
+  },
 ];
 
 interface GardenState {
   plants: Plant[];
+  removedPlantIds: string[];
   streak: number;
   lastStreakDate: Date | null;
   hasCompletedOnboarding: boolean;
@@ -153,14 +199,18 @@ interface GardenState {
   isAuthenticated: boolean;
   userEmail: string | null;
   themeMode: 'dark' | 'light';
-  
+  subscriptionTier: 'free' | 'pro';
+  selectedBackground: 'greenhouse' | 'garden' | 'forest' | 'farm' | 'none';
+  // showFog: boolean;
+
   // Gamification metrics
   rootNetworkExpansion: number; // 0-1, based on streak
   careConsistency: number; // 0-1, based on plant health average
-  
+
   // Actions
   addPlant: (speciesId: string) => void;
   removePlant: (plantId: string) => void;
+  clearRemovedPlantIds: (ids: string[]) => void;
   waterPlant: (plantId: string) => void;
   selectPlant: (plantId: string | null) => void;
   setInspecting: (inspecting: boolean) => void;
@@ -171,17 +221,21 @@ interface GardenState {
   signOut: () => void;
   resetGarden: () => void;
   toggleTheme: () => void;
+  setSubscriptionTier: (tier: 'free' | 'pro') => void;
+  setBackground: (bg: 'greenhouse' | 'garden' | 'forest' | 'farm' | 'none') => void;
+  // toggleFog: () => void;
   updateGrowthAnimation: () => void; // Smooth morph target interpolation
   getWateringSchedule: (plantId: string) => { daysUntil: number; frequency: number; isOverdue: boolean };
   updateGamificationMetrics: () => void; // Update root network and care consistency
 }
 
-const generateId = () => Math.random().toString(36).substring(2, 15);
+const generateId = () => crypto.randomUUID();
 
 export const useGardenStore = create<GardenState>()(
   persist(
     (set, get) => ({
       plants: [],
+      removedPlantIds: [],
       streak: 0,
       lastStreakDate: null,
       hasCompletedOnboarding: false,
@@ -191,16 +245,24 @@ export const useGardenStore = create<GardenState>()(
       isAuthenticated: false,
       userEmail: null,
       themeMode: 'dark',
+      subscriptionTier: 'free',
+      selectedBackground: 'greenhouse',
+      // showFog: true,
       rootNetworkExpansion: 0,
       careConsistency: 1,
+
+      setSubscriptionTier: (tier) => set({ subscriptionTier: tier }),
+      setBackground: (bg) => set({ selectedBackground: bg }),
+      // toggleFog: () => set((state) => ({ showFog: !state.showFog })),
 
       addPlant: (speciesId: string) => {
         const species = PLANT_SPECIES.find(s => s.id === speciesId);
         if (!species) return;
-        
-        const { plants } = get();
-        if (plants.length >= 10) return;
-        
+
+        const { plants, subscriptionTier } = get();
+        // Limit check
+        if (subscriptionTier === 'free' && plants.length >= 10) return;
+
         const newPlant: Plant = {
           id: generateId(),
           speciesId,
@@ -216,26 +278,37 @@ export const useGardenStore = create<GardenState>()(
           targetGrowthStage: 1,
           growthAnimationSpeed: 1,
         };
-        
+
         set({ plants: [...plants, newPlant] });
       },
 
       removePlant: (plantId: string) => {
-        const { plants } = get();
-        set({ plants: plants.filter(p => p.id !== plantId) });
+        const { plants, removedPlantIds } = get();
+        set({
+          plants: plants.filter(p => p.id !== plantId),
+          removedPlantIds: [...removedPlantIds, plantId]
+        });
+      },
+
+      clearRemovedPlantIds: (ids: string[]) => {
+        const { removedPlantIds } = get();
+        set({
+          removedPlantIds: removedPlantIds.filter(id => !ids.includes(id))
+        });
       },
 
       waterPlant: (plantId: string) => {
         const { plants, streak, lastStreakDate } = get();
         const now = new Date();
-        
+
         set({
           plants: plants.map(p => {
             if (p.id !== plantId) return p;
-            
+
             const wasNeglected = p.health < 0.5;
+            // Increase growth by 1 stage per watering as per user request
             const newTargetStage = Math.min(30, p.targetGrowthStage + 1);
-            
+
             return {
               ...p,
               lastWatered: now,
@@ -248,15 +321,15 @@ export const useGardenStore = create<GardenState>()(
             };
           }),
         });
-        
+
         // Update streak
         const today = new Date().toDateString();
         const lastDate = lastStreakDate ? new Date(lastStreakDate).toDateString() : null;
-        
+
         if (lastDate !== today) {
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
-          
+
           if (lastDate === yesterday.toDateString()) {
             set({ streak: streak + 1, lastStreakDate: now });
           } else if (lastDate !== today) {
@@ -281,25 +354,24 @@ export const useGardenStore = create<GardenState>()(
         const { plants } = get();
         const now = new Date();
         const isSummer = now.getMonth() >= 3 && now.getMonth() <= 8;
-        
+
         let hasAtRiskPlant = false;
-        
+
         const updatedPlants = plants.map(plant => {
           const species = PLANT_SPECIES.find(s => s.id === plant.speciesId);
           if (!species || !plant.lastWatered) return plant;
-          
-          const daysSinceWatered = Math.floor(
-            (now.getTime() - new Date(plant.lastWatered).getTime()) / (1000 * 60 * 60 * 24)
-          );
-          
-          const frequency = isSummer 
-            ? species.wateringFrequencySummer 
+
+          // Use floating point days for precision
+          const daysSinceWatered = (now.getTime() - new Date(plant.lastWatered).getTime()) / (1000 * 60 * 60 * 24);
+
+          const frequency = isSummer
+            ? species.wateringFrequencySummer
             : species.wateringFrequencyWinter;
-          
+
           // More nuanced health decay based on species-specific schedule
           const overdueRatio = daysSinceWatered / frequency;
           let healthDecay = 1;
-          
+
           if (overdueRatio <= 1) {
             // Within schedule - healthy
             healthDecay = 1;
@@ -313,24 +385,24 @@ export const useGardenStore = create<GardenState>()(
             // Severely overdue - critical
             healthDecay = Math.max(0.1, 0.5 - (overdueRatio - 2) * 0.2);
           }
-          
+
           if (healthDecay < 0.5) hasAtRiskPlant = true;
-          
+
           // Reverse growth animation when severely neglected
           let newTargetStage = plant.targetGrowthStage;
           let newGrowthStage = plant.growthStage;
-          
+
           if (overdueRatio > 2) {
             // Regress growth stage - reverse animation
             const stagesLost = Math.floor((overdueRatio - 2) * 0.5);
             newTargetStage = Math.max(1, plant.targetGrowthStage - stagesLost);
-            
+
             // If target is lower than current, trigger reverse animation
             if (newTargetStage < plant.growthStage) {
               newGrowthStage = plant.growthStage; // Keep current for smooth transition
             }
           }
-          
+
           return {
             ...plant,
             health: healthDecay,
@@ -339,8 +411,8 @@ export const useGardenStore = create<GardenState>()(
             wasNeglected: overdueRatio > 1.5,
           };
         });
-        
-        set({ 
+
+        set({
           plants: updatedPlants,
           lightingMode: hasAtRiskPlant ? 'twilight' : 'golden',
         });
@@ -349,29 +421,29 @@ export const useGardenStore = create<GardenState>()(
       checkStreak: () => {
         const { lastStreakDate } = get();
         if (!lastStreakDate) return;
-        
+
         const now = new Date();
         const lastDate = new Date(lastStreakDate);
         const daysDiff = Math.floor(
           (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
         );
-        
+
         if (daysDiff > 1) {
           set({ streak: 0, lightingMode: 'twilight' });
         }
       },
 
       signIn: (email: string) => {
-        set({ 
-          isAuthenticated: true, 
-          userEmail: email 
+        set({
+          isAuthenticated: true,
+          userEmail: email
         });
       },
 
       signOut: () => {
-        set({ 
-          isAuthenticated: false, 
-          userEmail: null 
+        set({
+          isAuthenticated: false,
+          userEmail: null
         });
       },
 
@@ -396,7 +468,7 @@ export const useGardenStore = create<GardenState>()(
       // Smooth morph target interpolation for growth animations
       updateGrowthAnimation: () => {
         const { plants } = get();
-        
+
         const updatedPlants = plants.map(plant => {
           // Skip if already at target
           if (plant.growthStage === plant.targetGrowthStage) {
@@ -406,10 +478,11 @@ export const useGardenStore = create<GardenState>()(
               growthAnimationSpeed: 1,
             };
           }
-          
+
           // Calculate interpolation step based on animation speed
-          const step = 0.1 * plant.growthAnimationSpeed;
-          
+          // tuned to 0.015 so 3 stages take ~3.3s (200 frames @ 60fps)
+          const step = 0.015 * plant.growthAnimationSpeed;
+
           let newGrowthStage: number;
           if (plant.growthStage < plant.targetGrowthStage) {
             // Growing
@@ -424,14 +497,14 @@ export const useGardenStore = create<GardenState>()(
               plant.growthStage - step * 0.5 // Slower wither
             );
           }
-          
+
           return {
             ...plant,
             previousGrowthStage: plant.growthStage,
             growthStage: newGrowthStage,
           };
         });
-        
+
         set({ plants: updatedPlants });
       },
 
@@ -439,47 +512,46 @@ export const useGardenStore = create<GardenState>()(
       getWateringSchedule: (plantId: string) => {
         const { plants } = get();
         const plant = plants.find(p => p.id === plantId);
-        
+
         if (!plant || !plant.lastWatered) {
           return { daysUntil: 0, frequency: 7, isOverdue: true };
         }
-        
+
         const species = PLANT_SPECIES.find(s => s.id === plant.speciesId);
         if (!species) {
           return { daysUntil: 0, frequency: 7, isOverdue: true };
         }
-        
+
         const now = new Date();
         const isSummer = now.getMonth() >= 3 && now.getMonth() <= 8;
-        const frequency = isSummer 
-          ? species.wateringFrequencySummer 
+        const frequency = isSummer
+          ? species.wateringFrequencySummer
           : species.wateringFrequencyWinter;
-        
-        const daysSinceWatered = Math.floor(
-          (now.getTime() - new Date(plant.lastWatered).getTime()) / (1000 * 60 * 60 * 24)
-        );
-        
+
+        // Use floating point for precision (needed for test plants with minute-based schedules)
+        const daysSinceWatered = (now.getTime() - new Date(plant.lastWatered).getTime()) / (1000 * 60 * 60 * 24);
+
         const daysUntil = Math.max(0, frequency - daysSinceWatered);
         const isOverdue = daysSinceWatered >= frequency;
-        
+
         return { daysUntil, frequency, isOverdue };
       },
 
       // Update gamification metrics based on streak and plant health
       updateGamificationMetrics: () => {
         const { plants, streak } = get();
-        
+
         // Root network expansion based on streak (0-1)
         // Max expansion at 30-day streak
         const rootNetworkExpansion = Math.min(1, streak / 30);
-        
+
         // Care consistency based on average plant health
         let careConsistency = 1;
         if (plants.length > 0) {
           const avgHealth = plants.reduce((sum, p) => sum + p.health, 0) / plants.length;
           careConsistency = avgHealth;
         }
-        
+
         set({ rootNetworkExpansion, careConsistency });
       },
     }),
@@ -493,6 +565,7 @@ export const useGardenStore = create<GardenState>()(
         isAuthenticated: state.isAuthenticated,
         userEmail: state.userEmail,
         themeMode: state.themeMode,
+        // showFog: state.showFog,
       }),
     }
   )

@@ -17,17 +17,17 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
   const [showParticles, setShowParticles] = useState(false);
   const [plantGrowth, setPlantGrowth] = useState(0);
-  
+
   const addPlant = useGardenStore(state => state.addPlant);
   const completeOnboarding = useGardenStore(state => state.completeOnboarding);
-  
+
   // Void stage spotlight animation
   useEffect(() => {
     if (step === 'void') {
       setTimeout(() => setStep('acquisition'), 3000);
     }
   }, [step]);
-  
+
   const handleAddButtonClick = useCallback(() => {
     setIsButtonPressed(true);
     setTimeout(() => {
@@ -35,11 +35,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       setIsButtonPressed(false);
     }, 600);
   }, []);
-  
+
   const handleSpeciesSelect = useCallback((speciesId: string) => {
     setSelectedSpecies(speciesId);
     setShowParticles(true);
-    
+
     // Particle dissolve animation
     setTimeout(() => {
       addPlant(speciesId);
@@ -49,7 +49,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       }, 1000);
     }, 2000);
   }, [addPlant]);
-  
+
   const handleWaterStart = useCallback(() => {
     setIsWatering(true);
     const interval = setInterval(() => {
@@ -57,7 +57,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         if (prev >= 100) {
           clearInterval(interval);
           setIsWatering(false);
-          
+
           // Instant visible growth animation
           const growthInterval = setInterval(() => {
             setPlantGrowth(g => {
@@ -75,20 +75,20 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               return g + 5;
             });
           }, 50);
-          
+
           return 100;
         }
         return prev + 2;
       });
     }, 50);
   }, [completeOnboarding, onComplete]);
-  
+
   const handleWaterEnd = useCallback(() => {
     if (waterProgress < 100) {
       setIsWatering(false);
     }
   }, [waterProgress]);
-  
+
   return (
     <div className="fixed inset-0 bg-[#050505] z-50 overflow-hidden">
       <AnimatePresence mode="wait">
@@ -103,16 +103,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             className="absolute inset-0 flex flex-col items-center justify-center"
           >
             {/* Dramatic spotlight effect */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5, duration: 2 }}
-              className="absolute inset-0" 
+              className="absolute inset-0"
               style={{
                 background: 'radial-gradient(circle at 50% 60%, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 30%, transparent 60%)'
               }}
             />
-            
+
             {/* Marble pedestal with enhanced lighting */}
             <motion.div
               initial={{ y: 100, opacity: 0 }}
@@ -122,7 +122,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               {/* Pedestal glow */}
               <div className="absolute inset-0 blur-2xl bg-[#D4AF37]/10 scale-150" />
-              
+
               {/* Pedestal structure */}
               <div className="relative">
                 <div className="w-32 h-4 bg-gradient-to-b from-[#F5F3EE] to-[#D4D0C8] rounded-t-sm shadow-2xl" />
@@ -132,7 +132,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             </motion.div>
           </motion.div>
         )}
-        
+
         {/* Acquisition Moment - Glowing + button */}
         {step === 'acquisition' && (
           <motion.div
@@ -144,13 +144,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             className="absolute inset-0 flex flex-col items-center justify-center"
           >
             {/* Spotlight continues */}
-            <div 
-              className="absolute inset-0" 
+            <div
+              className="absolute inset-0"
               style={{
                 background: 'radial-gradient(circle at 50% 60%, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 30%, transparent 60%)'
               }}
             />
-            
+
             {/* Pedestal */}
             <div className="relative mb-16">
               <div className="absolute inset-0 blur-2xl bg-[#D4AF37]/10 scale-150" />
@@ -160,7 +160,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 <div className="w-36 h-3 mx-auto bg-gradient-to-b from-[#D4D0C8] to-[#B8B4AC] -mt-px shadow-2xl" />
               </div>
             </div>
-            
+
             {/* Text prompt */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -170,16 +170,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               Begin your collection
             </motion.h1>
-            
+
             {/* Glowing + button with physical compression */}
             <motion.button
               initial={{ opacity: 0, scale: 0 }}
-              animate={{ 
-                opacity: 1, 
+              animate={{
+                opacity: 1,
                 scale: isButtonPressed ? 0.85 : 1,
               }}
-              transition={{ 
-                delay: 1, 
+              transition={{
+                delay: 1,
                 duration: 0.5,
                 scale: { type: 'spring', stiffness: 500, damping: 30 }
               }}
@@ -187,27 +187,27 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               className="relative group"
             >
               {/* Outer glow - pulsing */}
-              <motion.div 
-                animate={{ 
+              <motion.div
+                animate={{
                   opacity: [0.3, 0.6, 0.3],
                   scale: [1, 1.2, 1]
                 }}
-                transition={{ 
-                  duration: 2, 
+                transition={{
+                  duration: 2,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
                 className="absolute inset-0 bg-[#D4AF37] rounded-full blur-2xl"
               />
-              
+
               {/* Middle glow */}
               <div className="absolute inset-0 bg-[#D4AF37] rounded-full blur-xl opacity-60 group-hover:opacity-90 transition-opacity" />
-              
+
               {/* Button with compression effect */}
-              <motion.div 
+              <motion.div
                 animate={{
-                  boxShadow: isButtonPressed 
-                    ? '0 4px 20px rgba(212, 175, 55, 0.4)' 
+                  boxShadow: isButtonPressed
+                    ? '0 4px 20px rgba(212, 175, 55, 0.4)'
                     : '0 10px 40px rgba(212, 175, 55, 0.5)'
                 }}
                 className={`
@@ -218,13 +218,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   ${isButtonPressed ? 'shadow-inner' : 'hover:scale-105'}
                 `}
               >
-                <Plus 
-                  className="w-12 h-12 text-[#050505]" 
+                <Plus
+                  className="w-12 h-12 text-[#050505]"
                   strokeWidth={3}
                 />
               </motion.div>
             </motion.button>
-            
+
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -235,7 +235,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             </motion.p>
           </motion.div>
         )}
-        
+
         {/* Selection Stage with Particle Dissolve */}
         {step === 'selection' && (
           <motion.div
@@ -252,14 +252,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               Select your first specimen
             </motion.h2>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
               className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-6xl max-h-[60vh] overflow-y-auto p-4"
             >
-              {PLANT_SPECIES.slice(0, 5).map((species, index) => (
+              {PLANT_SPECIES.map((species, index) => (
                 <motion.button
                   key={species.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -270,31 +270,31 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   className={`
                     relative backdrop-blur-lg bg-black/40 border border-white/10 rounded-2xl
                     p-4 text-left transition-all duration-300
-                    ${selectedSpecies === species.id 
-                      ? 'ring-2 ring-[#D4AF37] shadow-lg shadow-[#D4AF37]/30' 
+                    ${selectedSpecies === species.id
+                      ? 'ring-2 ring-[#D4AF37] shadow-lg shadow-[#D4AF37]/30'
                       : 'hover:ring-1 hover:ring-[#D4AF37]/50'}
                     ${selectedSpecies && selectedSpecies !== species.id ? 'opacity-30' : ''}
                   `}
                 >
-                  <div 
+                  <div
                     className="w-full aspect-square rounded-lg mb-3 flex items-center justify-center relative overflow-hidden"
                     style={{ backgroundColor: species.color + '40' }}
                   >
                     <Sparkles className="w-12 h-12" style={{ color: species.color }} />
-                    
+
                     {/* Particle dissolve effect */}
                     {selectedSpecies === species.id && showParticles && (
                       <div className="absolute inset-0">
                         {Array.from({ length: 30 }).map((_, i) => (
                           <motion.div
                             key={i}
-                            initial={{ 
-                              x: '50%', 
+                            initial={{
+                              x: '50%',
                               y: '50%',
                               scale: 1,
-                              opacity: 1 
+                              opacity: 1
                             }}
-                            animate={{ 
+                            animate={{
                               x: `${50 + (Math.random() - 0.5) * 200}%`,
                               y: `${50 + (Math.random() - 0.5) * 200}%`,
                               scale: 0,
@@ -324,7 +324,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </motion.button>
               ))}
             </motion.div>
-            
+
             {selectedSpecies && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -340,7 +340,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             )}
           </motion.div>
         )}
-        
+
         {/* Watering Stage - Hold-to-water with particle stream */}
         {step === 'watering' && (
           <motion.div
@@ -357,7 +357,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               Sustain life
             </motion.h2>
-            
+
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -366,21 +366,21 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               Hold to water your plant
             </motion.p>
-            
+
             {/* Enhanced water particle stream */}
             {isWatering && (
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-full pointer-events-none overflow-hidden">
                 {Array.from({ length: 40 }).map((_, i) => (
                   <motion.div
                     key={i}
-                    initial={{ 
-                      y: -20, 
+                    initial={{
+                      y: -20,
                       x: (Math.random() - 0.5) * 60,
                       opacity: 0,
                       scale: Math.random() * 0.5 + 0.5
                     }}
-                    animate={{ 
-                      y: '100vh', 
+                    animate={{
+                      y: '100vh',
                       opacity: [0, 1, 1, 0.5, 0],
                       rotate: Math.random() * 360
                     }}
@@ -401,12 +401,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 ))}
               </div>
             )}
-            
+
             {/* Plant visualization with instant growth */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ 
-                scale: 1 + (waterProgress * 0.003) + (plantGrowth * 0.005), 
+              animate={{
+                scale: 1 + (waterProgress * 0.003) + (plantGrowth * 0.005),
                 opacity: 1,
                 y: plantGrowth > 0 ? -plantGrowth * 0.2 : 0
               }}
@@ -415,7 +415,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               {/* Plant container */}
               <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-[#4A7C59] to-[#2D5A3D] flex items-center justify-center">
                 <Sparkles className="w-16 h-16 text-[#F5F3EE]" />
-                
+
                 {/* Growth leaves animation */}
                 {plantGrowth > 0 && (
                   <>
@@ -423,13 +423,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       <motion.div
                         key={i}
                         initial={{ scale: 0, rotate: 0 }}
-                        animate={{ 
-                          scale: 1, 
+                        animate={{
+                          scale: 1,
                           rotate: (i * 72) + (plantGrowth * 2)
                         }}
-                        transition={{ 
+                        transition={{
                           duration: 0.5,
-                          delay: i * 0.1 
+                          delay: i * 0.1
                         }}
                         className="absolute w-8 h-12 bg-gradient-to-t from-[#4A7C59] to-[#6B9A7A] rounded-full"
                         style={{
@@ -442,12 +442,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   </>
                 )}
               </div>
-              
+
               {/* Bloom pulse effect */}
               {waterProgress > 0 && (
                 <motion.div
                   initial={{ scale: 0 }}
-                  animate={{ 
+                  animate={{
                     scale: 1 + waterProgress * 0.015,
                     opacity: [0.3, 0.6, 0.3]
                   }}
@@ -458,12 +458,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   className="absolute inset-0 rounded-full bg-[#D4AF37]/30 blur-2xl"
                 />
               )}
-              
+
               {/* Intense growth glow */}
               {plantGrowth > 50 && (
                 <motion.div
                   initial={{ scale: 0 }}
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.5, 1],
                     opacity: [0.5, 0.8, 0.5]
                   }}
@@ -475,7 +475,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 />
               )}
             </motion.div>
-            
+
             {/* Water button with liquid surface shader effect */}
             <motion.button
               initial={{ opacity: 0, y: 20 }}
@@ -493,7 +493,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 absolute inset-0 rounded-full blur-2xl transition-all duration-300
                 ${isWatering ? 'bg-[#4A9FD4] opacity-90 scale-110' : 'bg-[#4A9FD4] opacity-40'}
               `} />
-              
+
               {/* Ripple effect on press */}
               {isWatering && (
                 <motion.div
@@ -503,12 +503,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   className="absolute inset-0 rounded-full border-2 border-[#4A9FD4]"
                 />
               )}
-              
+
               {/* Button with liquid shader simulation */}
-              <motion.div 
+              <motion.div
                 animate={{
-                  boxShadow: isWatering 
-                    ? '0 4px 30px rgba(74, 159, 212, 0.6), inset 0 2px 10px rgba(0,0,0,0.3)' 
+                  boxShadow: isWatering
+                    ? '0 4px 30px rgba(74, 159, 212, 0.6), inset 0 2px 10px rgba(0,0,0,0.3)'
                     : '0 10px 40px rgba(74, 159, 212, 0.4)',
                 }}
                 className={`
@@ -530,10 +530,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   }}
                   className="absolute inset-0 bg-gradient-to-t from-[#2A7FB4]/50 to-transparent"
                 />
-                
+
                 <Droplets className="relative w-12 h-12 text-white z-10" />
               </motion.div>
-              
+
               {/* Progress ring */}
               <svg className="absolute inset-0 w-28 h-28 -rotate-90 pointer-events-none">
                 <circle
@@ -552,7 +552,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 />
               </svg>
             </motion.button>
-            
+
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -561,7 +561,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               {waterProgress}% hydrated
             </motion.p>
-            
+
             {/* Growth indicator */}
             {plantGrowth > 0 && (
               <motion.p
@@ -574,7 +574,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             )}
           </motion.div>
         )}
-        
+
         {/* Complete Stage */}
         {step === 'complete' && (
           <motion.div
@@ -595,7 +595,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 <Sparkles className="w-16 h-16 text-[#050505]" />
               </div>
             </motion.div>
-            
+
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -604,7 +604,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               Welcome to Eden
             </motion.h2>
-            
+
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

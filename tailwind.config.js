@@ -51,6 +51,21 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Luxury Palette
+        void: "#050505",
+        gold: {
+          DEFAULT: "#D4AF37",
+          dim: "#8A7010", // for 'at risk' state or inactive
+          light: "#F4DF87", // for highlights
+        },
+        emerald: {
+          DEFAULT: "#004030",
+          dark: "#002018",
+        },
+      },
+      fontFamily: {
+        serif: ["Playfair Display", "serif"],
+        sans: ["Inter", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

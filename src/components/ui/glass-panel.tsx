@@ -1,39 +1,30 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+
+import { cn } from "@/lib/utils"
 
 interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'dark' | 'light';
-  blur?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'light' | 'dark'
+  intensity?: 'low' | 'medium' | 'high'
+  blur?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
 }
 
-export const GlassPanel = React.forwardRef<HTMLDivElement, GlassPanelProps>(
-  ({ className, variant = 'default', blur = 'lg', ...props }, ref) => {
-    const blurMap = {
-      sm: 'backdrop-blur-sm',
-      md: 'backdrop-blur-md',
-      lg: 'backdrop-blur-lg',
-      xl: 'backdrop-blur-xl',
-    };
-
-    const variantMap = {
-      default: 'bg-black/40 border-white/10',
-      dark: 'bg-black/60 border-white/5',
-      light: 'bg-white/10 border-white/20',
-    };
-
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'rounded-2xl border',
-          blurMap[blur],
-          variantMap[variant],
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
-
-GlassPanel.displayName = 'GlassPanel';
+export function GlassPanel({
+  children,
+  className,
+  variant = 'dark',
+  intensity = 'medium',
+  blur = 'xl',
+  ...props
+}: GlassPanelProps) {
+  return (
+    <div
+      className={cn(
+        "backdrop-blur-xl border rounded-2xl",
+        variant === 'dark' ? "bg-black/40 border-white/10" : "bg-white/40 border-black/5",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}

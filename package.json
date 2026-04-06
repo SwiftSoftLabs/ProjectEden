@@ -50,8 +50,9 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.1.5",
-    "framer-motion": "^11.18.0",
+    "framer-motion": "^11.18.2",
     "lucide-react": "^0.394.0",
+    "maath": "^0.10.8",
     "react": "^18.2.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.2.0",
@@ -59,22 +60,25 @@
     "react-resizable-panels": "^2.0.19",
     "react-router": "^6.23.1",
     "react-router-dom": "^6.23.1",
-    "tailwind-merge": "^2.3.0",
+    "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.160.1",
+    "use-sound": "^5.0.0",
     "vaul": "^0.9.1",
+    "vite-plugin-pwa": "^1.2.0",
     "zod": "^3.23.8",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@types/node": "^20.14.2",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-react-swc": "^4.1.0",
+    "@vitejs/plugin-react-swc": "^3.11.0",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "tailwindcss": "3.4.1",
     "typescript": "^5.8.2",
-    "vite": "^7.1.12"
+    "vite": "^5.4.21"
   }
 }
