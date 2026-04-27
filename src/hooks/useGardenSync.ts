@@ -200,4 +200,89 @@ export function useGardenSync() {
 
         syncDeletions();
     }, [user, removedPlantIds, clearRemovedPlantIds]);
+
+    // 5. Real-time Subscriptions
+    useEffect(() => {
+        if (!user) return;
+
+        const plantsChannel = supabase
+            .channel('garden_plants_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'app_projecteden',
+                    table: 'plants',
+                    filter: `user_id=eq.${user.id}`,
+                },
+                (payload) => {
+                    const { eventType, new: newPlant, old: oldPlant } = payload;
+                    
+                    if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                        const p = newPlant as any;
+                        const mappedPlant: Plant = {
+                            id: p.id,
+                            speciesId: p.species_id,
+                            name: p.name,
+                            commonName: p.common_name,
+                            growthStage: p.growth_stage ?? 1,
+                            health: p.health ?? 1,
+                            lastWatered: p.last_watered ? new Date(p.last_watered) : null,
+                            addedAt: p.added_at ? new Date(p.added_at) : new Date(),
+                            position: p.position ?? 0,
+                            wasNeglected: p.was_neglected ?? false,
+                            previousGrowthStage: p.growth_stage ?? 1,
+                            targetGrowthStage: p.target_growth_stage ?? 1,
+                            growthAnimationSpeed: 1,
+                        };
+                        
+                        const currentPlants = useGardenStore.getState().plants;
+                        const existingIdx = currentPlants.findIndex(cp => cp.id === p.id);
+                        
+                        if (existingIdx >= 0) {
+                            const current = currentPlants[existingIdx];
+                            // Only update if remote is newer
+                            if (!current.lastWatered || (mappedPlant.lastWatered && mappedPlant.lastWatered > current.lastWatered)) {
+                                const newPlants = [...currentPlants];
+                                newPlants[existingIdx] = mappedPlant;
+                                useGardenStore.setState({ plants: newPlants });
+                            }
+                        } else {
+                            useGardenStore.setState({ plants: [...currentPlants, mappedPlant] });
+                        }
+                    } else if (eventType === 'DELETE') {
+                        const currentPlants = useGardenStore.getState().plants;
+                        useGardenStore.setState({ plants: currentPlants.filter(p => p.id !== (oldPlant as any).id) });
+                    }
+                }
+            )
+            .subscribe();
+
+        const profileChannel = supabase
+            .channel('garden_profile_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'app_projecteden',
+                    table: 'profiles',
+                    filter: `id=eq.${user.id}`,
+                },
+                (payload) => {
+                    const p = payload.new as any;
+                    useGardenStore.setState({
+                        hasCompletedOnboarding: p.has_completed_onboarding ?? false,
+                        streak: p.streak ?? 0,
+                        subscriptionTier: p.subscription_tier ?? 'free',
+                        selectedBackground: p.selected_background ?? 'greenhouse',
+                    });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(plantsChannel);
+            supabase.removeChannel(profileChannel);
+        };
+    }, [user]);
 }

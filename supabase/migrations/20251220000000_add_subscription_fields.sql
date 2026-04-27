@@ -1,5 +1,5 @@
 -- Add subscription and background fields to profiles
-alter table public.profiles
+alter table app_projecteden.profiles
 add column if not exists subscription_tier text default 'free',
 add column if not exists selected_background text default 'greenhouse';
 

@@ -1,6 +1,6 @@
 
 -- Create profiles table
-create table public.profiles (
+create table app_projecteden.profiles (
   id uuid references auth.users not null primary key,
   username text,
   has_completed_onboarding boolean default false,
@@ -10,23 +10,23 @@ create table public.profiles (
 );
 
 -- Enable RLS
-alter table public.profiles enable row level security;
+alter table app_projecteden.profiles enable row level security;
 
 -- Profiles policies
 create policy "Public profiles are viewable by everyone."
-  on profiles for select
+  on app_projecteden.profiles for select
   using ( true );
 
 create policy "Users can insert their own profile."
-  on profiles for insert
+  on app_projecteden.profiles for insert
   with check ( auth.uid() = id );
 
 create policy "Users can update own profile."
-  on profiles for update
+  on app_projecteden.profiles for update
   using ( auth.uid() = id );
 
 -- Create plants table
-create table public.plants (
+create table app_projecteden.plants (
   id text not null, -- using text ID from application (uuid/random string)
   user_id uuid references auth.users not null,
   species_id text not null,
@@ -43,21 +43,21 @@ create table public.plants (
 );
 
 -- Enable RLS
-alter table public.plants enable row level security;
+alter table app_projecteden.plants enable row level security;
 
 -- Plants policies
 create policy "Users can view their own plants."
-  on plants for select
+  on app_projecteden.plants for select
   using ( auth.uid() = user_id );
 
 create policy "Users can insert their own plants."
-  on plants for insert
+  on app_projecteden.plants for insert
   with check ( auth.uid() = user_id );
 
 create policy "Users can update their own plants."
-  on plants for update
+  on app_projecteden.plants for update
   using ( auth.uid() = user_id );
 
 create policy "Users can delete their own plants."
-  on plants for delete
+  on app_projecteden.plants for delete
   using ( auth.uid() = user_id );

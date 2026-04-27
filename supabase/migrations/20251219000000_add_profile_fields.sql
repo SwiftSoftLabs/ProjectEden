@@ -1,6 +1,6 @@
 
 -- Add new columns to profiles table
-alter table public.profiles 
+alter table app_projecteden.profiles 
 add column if not exists full_name text,
 add column if not exists avatar_url text;
 
