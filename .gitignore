@@ -33,8 +33,11 @@ core
 .github/
 
 
-# InsForge & AI agent skills
-.insforge
+# Local env (use .env.example)
+.env
+.env.local
+
+# AI agent skills
 .agent
 .agents
 .augment
