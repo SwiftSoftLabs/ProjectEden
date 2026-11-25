@@ -8,7 +8,7 @@ All AI Agents, coding assistants (Cursor, AI Studio, etc.), and developers MUST 
 
 ## 1. INFRASTRUCTURE TARGET
 
-* **Platform:** InsForge
+* **Platform:** Supabase (project `eqajpkxzrscrcbjnicfc`, us-east-1)
 
 * **Organization:** `SwiftSoftLabs`
 
@@ -44,7 +44,7 @@ When initializing or modifying this app's database, you MUST execute the followi
 
 * **Credentials:** Use the shared `SwiftSoftLabs` project API keys.
 
-* **Schema Flag:** The environment variable `NEXT_PUBLIC_DB_SCHEMA` must be set to `app_{project_name}`.
+* **Schema Flag:** The schema (`VITE_DB_SCHEMA` in this Vite app, default `app_projecteden`) must be set to `app_{project_name}`.
 
 * **Client Initialization:** The database client must be initialized to use the `app_{project_name}_user` role for all transactional queries.
 
